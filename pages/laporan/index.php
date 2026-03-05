@@ -33,42 +33,55 @@ require_once __DIR__ . '/../../includes/auth_check.php';
                     <h5><i class="fas fa-filter me-2"></i>Filter Laporan</h5>
                 </div>
                 <div class="card-body">
-                    <form method="GET" action="cetak.php" target="_blank">
-                        <div class="mb-3">
-                            <label class="form-label">Jenis Laporan</label>
-                            <select name="jenis" class="form-control">
-                                <option value="semua">Semua Transaksi</option>
-                                <option value="masuk">Barang Masuk</option>
-                                <option value="keluar">Barang Keluar</option>
-                            </select>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Periode</label>
-                            <select name="periode" class="form-control" id="periode">
-                                <option value="hari">Hari Ini</option>
-                                <option value="minggu">Minggu Ini</option>
-                                <option value="bulan">Bulan Ini</option>
-                                <option value="tahun">Tahun Ini</option>
-                                <option value="custom">Kustom</option>
-                            </select>
-                        </div>
-                        
-                        <div class="row" id="tanggal_custom" style="display: none;">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tanggal Mulai</label>
-                                <input type="date" name="tanggal_mulai" class="form-control">
+                    <?php if ($_SESSION['level'] == 'admin'): ?>
+                        <!-- Form untuk Admin (bisa cetak) -->
+                        <form method="GET" action="cetak.php" target="_blank">
+                            <div class="mb-3">
+                                <label class="form-label">Jenis Laporan</label>
+                                <select name="jenis" class="form-control">
+                                    <option value="semua">Semua Transaksi</option>
+                                    <option value="masuk">Barang Masuk</option>
+                                    <option value="keluar">Barang Keluar</option>
+                                </select>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tanggal Akhir</label>
-                                <input type="date" name="tanggal_akhir" class="form-control">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Periode</label>
+                                <select name="periode" class="form-control" id="periode">
+                                    <option value="hari">Hari Ini</option>
+                                    <option value="minggu">Minggu Ini</option>
+                                    <option value="bulan">Bulan Ini</option>
+                                    <option value="tahun">Tahun Ini</option>
+                                    <option value="custom">Kustom</option>
+                                </select>
                             </div>
+                            
+                            <div class="row" id="tanggal_custom" style="display: none;">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Tanggal Mulai</label>
+                                    <input type="date" name="tanggal_mulai" class="form-control">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Tanggal Akhir</label>
+                                    <input type="date" name="tanggal_akhir" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-print me-2"></i>Cetak Laporan
+                            </button>
+                        </form>
+                    <?php else: ?>
+                        <!-- Informasi untuk Staff (tidak bisa cetak) -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Informasi:</strong> Hanya admin yang dapat mencetak laporan.
                         </div>
-                        
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-print me-2"></i>Cetak Laporan
-                        </button>
-                    </form>
+                        <div class="text-center py-4">
+                            <i class="fas fa-lock" style="font-size: 3rem; color: #ccc;"></i>
+                            <p class="mt-3 text-muted">Anda tidak memiliki akses untuk mencetak laporan.</p>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -86,10 +99,12 @@ require_once __DIR__ . '/../../includes/auth_check.php';
                         <li>Barang keluar saja</li>
                         <li>Periode tertentu (harian, mingguan, bulanan, tahunan, atau kustom)</li>
                     </ul>
-                    <p class="text-muted mb-0">
-                        <i class="fas fa-lightbulb me-2 text-warning"></i>
-                        Laporan akan dibuka di tab baru dan siap untuk dicetak.
-                    </p>
+                    <?php if ($_SESSION['level'] == 'staff'): ?>
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Catatan:</strong> Untuk mencetak laporan, hubungi admin.
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -98,7 +113,7 @@ require_once __DIR__ . '/../../includes/auth_check.php';
 
 <script>
     // Tampilkan input tanggal kustom jika memilih periode custom
-    document.getElementById('periode').addEventListener('change', function() {
+    document.getElementById('periode')?.addEventListener('change', function() {
         if (this.value === 'custom') {
             document.getElementById('tanggal_custom').style.display = 'flex';
         } else {

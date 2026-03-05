@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/database.php';
+require_once '../config/function.php';
 
 // Jika sudah login, redirect ke dashboard
 if (isset($_SESSION['user_id'])) {
@@ -14,16 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $password = md5($_POST['password']);
     
-    // Sesuaikan dengan struktur tabel users Anda (id_user, bukan id)
     $query = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
     $result = mysqli_query($conn, $query);
     
     if (mysqli_num_rows($result) == 1) {
         $user = mysqli_fetch_assoc($result);
-        $_SESSION['user_id'] = $user['id_user']; // Sesuaikan dengan id_user
+        $_SESSION['user_id'] = $user['id_user'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
         $_SESSION['level'] = $user['level'];
+        
+        // Catat log login
+        catatLog($conn, 'Login', 'users', $user['id_user'], 'Login ke sistem');
         
         header("Location: ../pages/dashboard.php");
         exit();
@@ -34,13 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistem Inventaris Gudang</title>
     
-    <!-- Font Awesome 6 (CDN) -->
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Bootstrap 5 CSS -->
@@ -160,12 +162,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-left-color: #e74a3b;
         }
         
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border-left-color: #1cc88a;
-        }
-        
         .demo-login {
             background: #f8f9fc;
             border-radius: 10px;
@@ -180,12 +176,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-weight: 500;
         }
         
-        .demo-login small {
-            color: #858796;
-            display: block;
-            margin-bottom: 5px;
-        }
-        
         .demo-login .badge {
             background: #4e73df;
             color: white;
@@ -194,11 +184,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 0.8rem;
             margin-right: 5px;
             display: inline-block;
-            margin-bottom: 5px;
-        }
-        
-        .demo-login .badge.success {
-            background: #1cc88a;
         }
         
         .footer-text {
@@ -207,14 +192,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: #b7b9cc;
             font-size: 0.8rem;
         }
-        
-        /* Utility classes */
-        .me-2 {
-            margin-right: 8px;
-        }
     </style>
 </head>
-
 <body>
     <div class="login-card">
         <div class="login-header">
@@ -247,6 +226,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <i class="fas fa-sign-in-alt"></i> Login
             </button>
         </form>
+        
+        <div class="demo-login">
+            <p><i class="fas fa-info-circle me-2" style="color: #4e73df;"></i> Demo Login:</p>
+            <div style="margin-bottom: 8px;">
+                <span class="badge">Admin</span>
+                <small>username: <strong>admin</strong> / password: <strong>admin123</strong></small>
+            </div>
+            <div>
+                <span class="badge" style="background: #1cc88a;">Staff</span>
+                <small>username: <strong>staff</strong> / password: <strong>staff123</strong></small>
+            </div>
+        </div>
         
         <div class="footer-text">
             &copy; <?php echo date('Y'); ?> Sistem Inventaris Gudang

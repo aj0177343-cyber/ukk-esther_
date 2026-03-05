@@ -27,6 +27,11 @@ if (mysqli_num_rows($result) == 0) {
 
 $barang = mysqli_fetch_assoc($result);
 
+// Ambil data kategori
+$query_kategori = "SELECT nama_kategori FROM kategori WHERE id_kategori = {$barang['id_kategori']}";
+$result_kategori = mysqli_query($conn, $query_kategori);
+$kategori = mysqli_fetch_assoc($result_kategori);
+
 // Cek apakah barang digunakan di transaksi
 $cek_transaksi = mysqli_query($conn, "SELECT id_transaksi FROM transaksi WHERE id_barang = $id LIMIT 1");
 $barang_dipakai = (mysqli_num_rows($cek_transaksi) > 0);
@@ -39,9 +44,18 @@ if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
     if (mysqli_num_rows($cek_lagi) > 0) {
         $error = "Barang tidak dapat dihapus karena sudah memiliki transaksi!";
     } else {
+        // Hapus foto terlebih dahulu jika ada
+        if (!empty($barang['foto'])) {
+            hapusFoto($barang['foto']);
+        }
+        
+        // Hapus data barang
         $delete = "DELETE FROM barang WHERE id_barang = $id";
         
         if (mysqli_query($conn, $delete)) {
+            $detail = "Menghapus barang: {$barang['nama_barang']} ({$barang['kode_barang']})";
+            catatLog($conn, 'Hapus Barang', 'barang', $id, $detail);
+            
             $_SESSION['alert'] = [
                 'tipe' => 'success',
                 'pesan' => 'Data barang berhasil dihapus!'
@@ -89,7 +103,7 @@ if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 500px;
+            max-width: 550px;
             width: 100%;
             text-align: center;
         }
@@ -136,6 +150,42 @@ if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
             margin: 25px 0;
             text-align: left;
             border: 1px solid #eaecf4;
+        }
+        
+        .barang-info .foto-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .barang-info .foto-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            border: 2px solid #4e73df;
+            padding: 5px;
+            background: white;
+        }
+        
+        .barang-info .foto-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .barang-info .foto-preview .no-foto {
+            width: 100%;
+            height: 100%;
+            background: #f8f9fc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            font-size: 2rem;
         }
         
         .barang-info div {
@@ -219,13 +269,6 @@ if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
             transform: translateY(-2px);
         }
         
-        .btn-hapus:disabled, .btn-hapus.disabled {
-            background: #d1d3e2;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
         .alert {
             border-radius: 10px;
             padding: 15px;
@@ -250,22 +293,6 @@ if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
         .alert i {
             margin-right: 8px;
         }
-        
-        .me-2 {
-            margin-right: 8px;
-        }
-        
-        .mb-4 {
-            margin-bottom: 25px;
-        }
-        
-        .text-danger {
-            color: #e74a3b;
-        }
-        
-        .text-warning {
-            color: #f6c23e;
-        }
     </style>
 </head>
 <body>
@@ -279,6 +306,18 @@ if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
             <p class="mb-4">Barang ini tidak dapat dihapus karena sudah memiliki transaksi.</p>
             
             <div class="barang-info">
+                <div class="foto-container">
+                    <div class="foto-preview">
+                        <?php if (!empty($barang['foto'])): ?>
+                            <img src="http://ukk-esther_.test/uploads/barang/<?php echo $barang['foto']; ?>" alt="Foto Barang">
+                        <?php else: ?>
+                            <div class="no-foto">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
                 <div>
                     <i class="fas fa-barcode"></i>
                     <strong>Kode:</strong>
@@ -293,6 +332,11 @@ if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
                     <i class="fas fa-tag"></i>
                     <strong>Varian:</strong>
                     <span><?php echo $barang['varian_barang'] ?: '-'; ?></span>
+                </div>
+                <div>
+                    <i class="fas fa-tags"></i>
+                    <strong>Kategori:</strong>
+                    <span><?php echo $kategori['nama_kategori'] ?: '-'; ?></span>
                 </div>
                 <div>
                     <i class="fas fa-cubes"></i>
@@ -334,6 +378,18 @@ if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
             <?php endif; ?>
             
             <div class="barang-info">
+                <div class="foto-container">
+                    <div class="foto-preview">
+                        <?php if (!empty($barang['foto'])): ?>
+                            <img src="http://ukk-esther_.test/uploads/barang/<?php echo $barang['foto']; ?>" alt="Foto Barang">
+                        <?php else: ?>
+                            <div class="no-foto">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
                 <div>
                     <i class="fas fa-barcode"></i>
                     <strong>Kode:</strong>
@@ -348,6 +404,11 @@ if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
                     <i class="fas fa-tag"></i>
                     <strong>Varian:</strong>
                     <span><?php echo $barang['varian_barang'] ?: '-'; ?></span>
+                </div>
+                <div>
+                    <i class="fas fa-tags"></i>
+                    <strong>Kategori:</strong>
+                    <span><?php echo $kategori['nama_kategori'] ?: '-'; ?></span>
                 </div>
                 <div>
                     <i class="fas fa-cubes"></i>

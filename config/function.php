@@ -99,4 +99,110 @@ function tanggalIndonesia($tanggal) {
     $bulan = bulanIndonesia(date_format($date, 'n'));
     return date_format($date, 'd') . ' ' . $bulan . ' ' . date_format($date, 'Y');
 }
+
+// Fungsi untuk upload foto
+function uploadFoto($file, $kode_barang) {
+    $target_dir = $_SERVER['DOCUMENT_ROOT'] . '/UKK-Esther_/uploads/barang/';
+    $nama_file = $kode_barang . '_' . time() . '.' . strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $target_file = $target_dir . $nama_file;
+    $uploadOk = 1;
+    $imageFileType = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    
+    // Cek apakah file gambar
+    $check = getimagesize($file['tmp_name']);
+    if($check === false) {
+        return ['status' => false, 'pesan' => 'File bukan gambar!'];
+    }
+    
+    // Cek ukuran file (max 2MB)
+    if ($file['size'] > 2000000) {
+        return ['status' => false, 'pesan' => 'Ukuran file terlalu besar (max 2MB)!'];
+    }
+    
+    // Format yang diperbolehkan
+    if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif") {
+        return ['status' => false, 'pesan' => 'Hanya file JPG, JPEG, PNG & GIF yang diperbolehkan!'];
+    }
+    
+    // Upload file
+    if (move_uploaded_file($file['tmp_name'], $target_file)) {
+        return ['status' => true, 'nama_file' => $nama_file];
+    } else {
+        return ['status' => false, 'pesan' => 'Gagal upload file!'];
+    }
+}
+
+// Fungsi untuk hapus foto
+function hapusFoto($nama_file) {
+    if (!empty($nama_file)) {
+        $target_dir = $_SERVER['DOCUMENT_ROOT'] . '/UKK-Esther_/uploads/barang/';
+        $file_path = $target_dir . $nama_file;
+        if (file_exists($file_path)) {
+            unlink($file_path);
+        }
+    }
+    return true;
+}
+
+// ============================================
+// FUNGSI LOG AKTIVITAS - Tambahkan di sini
+// ============================================
+
+// Fungsi untuk mencatat log aktivitas
+function catatLog($conn, $aktivitas, $tabel = null, $id_data = null, $detail = null) {
+    // Cek apakah user sudah login
+    if (!isset($_SESSION['user_id'])) {
+        return false;
+    }
+    
+    // Ambil data user dari session
+    $id_user = $_SESSION['user_id'];
+    $username = $_SESSION['username'];
+    $level = $_SESSION['level'];
+    
+    // Ambil IP address user
+    $ip_address = $_SERVER['REMOTE_ADDR'];
+    
+    // Ambil informasi browser (user agent)
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+    
+    // Bersihkan data dari karakter khusus agar aman untuk database
+    $detail = mysqli_real_escape_string($conn, $detail);
+    $user_agent = mysqli_real_escape_string($conn, $user_agent);
+    
+    // Query untuk menyimpan log
+    $query = "INSERT INTO log_aktivitas (id_user, username, level, aktivitas, tabel, id_data, detail, ip_address, user_agent) 
+              VALUES ($id_user, '$username', '$level', '$aktivitas', '$tabel', $id_data, '$detail', '$ip_address', '$user_agent')";
+    
+    // Jalankan query dan kembalikan hasilnya
+    return mysqli_query($conn, $query);
+}
+
+// Fungsi untuk mendapatkan warna badge berdasarkan aktivitas
+function getBadgeLog($aktivitas) {
+    // Jika aktivitas mengandung kata 'Tambah' atau 'Login'
+    if (strpos($aktivitas, 'Tambah') !== false || strpos($aktivitas, 'Login') !== false) {
+        return 'success'; // Warna hijau
+    } 
+    // Jika aktivitas mengandung kata 'Edit', 'Update', atau 'Keluar'
+    elseif (strpos($aktivitas, 'Edit') !== false || strpos($aktivitas, 'Update') !== false || strpos($aktivitas, 'Keluar') !== false) {
+        return 'warning'; // Warna kuning
+    } 
+    // Jika aktivitas mengandung kata 'Hapus'
+    elseif (strpos($aktivitas, 'Hapus') !== false) {
+        return 'danger'; // Warna merah
+    } 
+    // Jika aktivitas mengandung kata 'Logout'
+    elseif (strpos($aktivitas, 'Logout') !== false) {
+        return 'secondary'; // Warna abu-abu
+    } 
+    // Jika aktivitas mengandung kata 'Masuk'
+    elseif (strpos($aktivitas, 'Masuk') !== false) {
+        return 'info'; // Warna biru muda
+    } 
+    // Default
+    else {
+        return 'secondary';
+    }
+}
 ?>

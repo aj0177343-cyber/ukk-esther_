@@ -19,8 +19,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                       VALUES ($id_barang, 'masuk', $jumlah, '$tujuan')";
             
             if (mysqli_query($conn, $query)) {
+                $id_transaksi = mysqli_insert_id($conn);
                 // Update stok barang (tambah)
                 mysqli_query($conn, "UPDATE barang SET stok_barang = stok_barang + $jumlah WHERE id_barang = $id_barang");
+                
+                // Ambil data barang untuk detail
+                $q = mysqli_query($conn, "SELECT nama_barang, kode_barang FROM barang WHERE id_barang = $id_barang");
+                $brg = mysqli_fetch_assoc($q);
+                $detail = "Barang masuk: {$brg['nama_barang']} ({$brg['kode_barang']}) - Jumlah: {$jumlah}, Tujuan: {$tujuan}";
+                catatLog($conn, 'Barang Masuk', 'transaksi', $id_transaksi, $detail);
                 
                 setAlert('success', 'Transaksi barang masuk berhasil dicatat!');
                 header("Location: index.php");

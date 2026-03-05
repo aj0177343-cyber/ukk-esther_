@@ -1,7 +1,4 @@
 <?php
-// Ambil base_url dari header
-global $base_url;
-
 // Ambil nama file saat ini untuk menentukan menu aktif
 $current_page = basename($_SERVER['PHP_SELF']);
 $current_folder = basename(dirname($_SERVER['PHP_SELF']));
@@ -18,25 +15,49 @@ $current_folder = basename(dirname($_SERVER['PHP_SELF']));
     </div>
     
     <div class="sidebar-menu">
-        <a href="<?php echo $base_url; ?>pages/dashboard.php" class="<?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
+        <!-- Dashboard -->
+        <a href="/pages/dashboard.php" class="<?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="<?php echo $base_url; ?>pages/data-barang/index.php" class="<?php echo ($current_folder == 'data-barang') ? 'active' : ''; ?>">
+        
+        <!-- Data Barang -->
+        <a href="/pages/data-barang/index.php" class="<?php echo ($current_folder == 'data-barang') ? 'active' : ''; ?>">
             <i class="fas fa-cubes"></i>
             <span>Data Barang</span>
         </a>
-        <a href="<?php echo $base_url; ?>pages/transaksi/index.php" class="<?php echo ($current_folder == 'transaksi') ? 'active' : ''; ?>">
+        
+        <!-- Kategori - Hanya Admin -->
+        <?php if ($_SESSION['level'] == 'admin'): ?>
+        <a href="/pages/kategori/index.php" class="<?php echo ($current_folder == 'kategori') ? 'active' : ''; ?>">
+            <i class="fas fa-tags"></i>
+            <span>Kategori</span>
+        </a>
+        <?php endif; ?>
+        
+        <!-- Transaksi -->
+        <a href="/pages/transaksi/index.php" class="<?php echo ($current_folder == 'transaksi') ? 'active' : ''; ?>">
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
         </a>
-        <a href="<?php echo $base_url; ?>pages/laporan/index.php" class="<?php echo ($current_folder == 'laporan') ? 'active' : ''; ?>">
+        
+        <!-- Laporan -->
+        <a href="/pages/laporan/index.php" class="<?php echo ($current_folder == 'laporan') ? 'active' : ''; ?>">
             <i class="fas fa-chart-bar"></i>
             <span>Laporan</span>
         </a>
         
+        <!-- Log Aktivitas - Hanya Admin -->
+        <?php if ($_SESSION['level'] == 'admin'): ?>
+        <a href="/pages/log/index.php" class="<?php echo ($current_folder == 'log') ? 'active' : ''; ?>">
+            <i class="fas fa-history"></i>
+            <span>Log Aktivitas</span>
+        </a>
+        <?php endif; ?>
+        
+        <!-- Logout -->
         <div class="logout">
-            <a href="<?php echo $base_url; ?>auth/logout.php">
+            <a href="/auth/logout.php">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </a>

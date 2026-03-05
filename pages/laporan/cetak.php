@@ -1,6 +1,18 @@
 <?php
 require_once __DIR__ . '/../../includes/auth_check.php';
 
+require_once __DIR__ . '/../../includes/auth_check.php';
+
+// Cek akses - hanya admin yang bisa mencetak
+if ($_SESSION['level'] != 'admin') {
+    $_SESSION['alert'] = [
+        'tipe' => 'danger',
+        'pesan' => 'Anda tidak memiliki akses untuk mencetak laporan!'
+    ];
+    header("Location: index.php");
+    exit();
+}
+
 // Ambil parameter filter
 $jenis = isset($_GET['jenis']) ? $_GET['jenis'] : 'semua';
 $periode = isset($_GET['periode']) ? $_GET['periode'] : 'hari';
