@@ -1,9 +1,10 @@
 <?php
-// Tentukan base URL dengan benar
+// Tentukan base URL
 $base_url = 'http://ukk-esther_.test/';
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,5 +25,6 @@ $base_url = 'http://ukk-esther_.test/';
     <!-- Custom CSS -->
     <link href="<?php echo $base_url; ?>assets/css/custom.css" rel="stylesheet">
 </head>
+
 <body>
     <div id="wrapper">

@@ -112,91 +112,93 @@ $kategori = mysqli_query($conn, "SELECT * FROM kategori ORDER BY nama_kategori A
     <!-- Alert -->
     <?php tampilAlert(); ?>
 
-    <div class="row">
-        <!-- Form Tambah Kategori -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-plus-circle me-2"></i>Tambah Kategori</h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST">
+    <!-- Form Tambah Kategori (Card Pertama) -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-plus-circle me-2"></i>Tambah Kategori</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="row">
+                    <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label">Nama Kategori <span class="text-danger">*</span></label>
                             <input type="text" name="nama_kategori" class="form-control" placeholder="Contoh: Elektronik, Komputer, Office" required>
                         </div>
+                    </div>
+                    <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label">Deskripsi</label>
-                            <textarea name="deskripsi" class="form-control" rows="3" placeholder="Opsional"></textarea>
+                            <input type="text" name="deskripsi" class="form-control" placeholder="Opsional">
                         </div>
-                        <button type="submit" name="tambah" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Simpan
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Daftar Kategori -->
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-list me-2"></i>Daftar Kategori</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table" id="dataTable">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Nama Kategori</th>
-                                    <th>Deskripsi</th>
-                                    <th>Jumlah Barang</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php 
-                                if (mysqli_num_rows($kategori) > 0):
-                                    $no = 1;
-                                    while($row = mysqli_fetch_assoc($kategori)): 
-                                        $jml = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM barang WHERE id_kategori = {$row['id_kategori']}"));
-                                ?>
-                                <tr>
-                                    <td class="text-center"><?php echo $no++; ?></td>
-                                    <td><?php echo $row['nama_kategori']; ?></td>
-                                    <td><?php echo $row['deskripsi'] ?: '-'; ?></td>
-                                    <td class="text-center">
-                                        <span class="badge bg-info"><?php echo $jml['total']; ?></span>
-                                    </td>
-                                    <td>
-                                        <button class="btn-action btn-edit" onclick="editKategori(<?php echo $row['id_kategori']; ?>, '<?php echo $row['nama_kategori']; ?>', '<?php echo $row['deskripsi']; ?>')" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <a href="?hapus=<?php echo $row['id_kategori']; ?>" 
-                                           class="btn-action btn-delete" 
-                                           title="Hapus"
-                                           onclick="return confirm('Yakin ingin menghapus kategori <?php echo $row['nama_kategori']; ?>?')">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                <?php 
-                                    endwhile;
-                                else:
-                                ?>
-                                <tr>
-                                    <td colspan="5" class="text-center py-4">
-                                        <i class="fas fa-tags" style="font-size: 3rem; color: #ccc; margin-bottom: 10px;"></i>
-                                        <p class="text-muted">Belum ada data kategori</p>
-                                        <p class="text-muted small">Klik tombol "Tambah Kategori" untuk menambah data.</p>
-                                    </td>
-                                </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
+                <div class="text-end">
+                    <button type="submit" name="tambah" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Daftar Kategori (Card Kedua) -->
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-list me-2"></i>Daftar Kategori</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th width="5%">No</th>
+                            <th width="20%">Nama Kategori</th>
+                            <th width="45%">Deskripsi</th>
+                            <th width="15%">Jumlah Barang</th>
+                            <th width="15%">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        if (mysqli_num_rows($kategori) > 0):
+                            $no = 1;
+                            while($row = mysqli_fetch_assoc($kategori)): 
+                                $jml = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM barang WHERE id_kategori = {$row['id_kategori']}"));
+                        ?>
+                        <tr>
+                            <td class="text-center"><?php echo $no++; ?></td>
+                            <td><?php echo $row['nama_kategori']; ?></td>
+                            <td><?php echo $row['deskripsi'] ?: '-'; ?></td>
+                            <td class="text-center">
+                                <span class="badge bg-info"><?php echo $jml['total']; ?></span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-warning me-1" onclick="editKategori(<?php echo $row['id_kategori']; ?>, '<?php echo $row['nama_kategori']; ?>', '<?php echo $row['deskripsi']; ?>')" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <a href="?hapus=<?php echo $row['id_kategori']; ?>" 
+                                   class="btn btn-sm btn-danger" 
+                                   title="Hapus"
+                                   onclick="return confirm('Yakin ingin menghapus kategori <?php echo $row['nama_kategori']; ?>?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <?php 
+                            endwhile;
+                        else:
+                        ?>
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                <i class="fas fa-tags" style="font-size: 3rem; color: #ccc; margin-bottom: 10px;"></i>
+                                <p class="text-muted">Belum ada data kategori</p>
+                                <p class="text-muted small">Klik tombol "Tambah Kategori" untuk menambah data.</p>
+                            </td>
+                        </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -250,7 +252,19 @@ function editKategori(id, nama, deskripsi) {
 $(document).ready(function() {
     $('#dataTable').DataTable({
         language: {
-            url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/id.json'
+            "processing": "Sedang memproses...",
+            "lengthMenu": "Tampilkan _MENU_ data per halaman",
+            "zeroRecords": "Tidak ditemukan data yang sesuai",
+            "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            "infoEmpty": "Menampilkan 0 sampai 0 dari 0 data",
+            "infoFiltered": "(disaring dari _MAX_ data keseluruhan)",
+            "search": "Cari:",
+            "paginate": {
+                "first": "Pertama",
+                "previous": "Sebelumnya",
+                "next": "Selanjutnya",
+                "last": "Terakhir"
+            }
         },
         columnDefs: [
             { orderable: false, targets: [4] } // Kolom aksi tidak bisa diurutkan
